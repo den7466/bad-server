@@ -16,7 +16,12 @@ const app = express()
 app.use(cookieParser())
 
 // app.use(cors())
-app.use(cors({ origin: ORIGIN_ALLOW, credentials: true, allowedHeaders: ['Authorization', 'Content-Type', 'X-CSRF-Token'] }));
+app.use(cors({
+    origin: ORIGIN_ALLOW,
+    credentials: true,
+    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+  }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
