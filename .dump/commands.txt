@@ -1,0 +1,3 @@
+mongoimport --db weblarek --collection products --authenticationDatabase admin --username root --password example --file weblarek.products.json --jsonArray
+
+mongoimport --db weblarek --collection users --authenticationDatabase admin --username root --password example --file weblarek.users.json --jsonArray
