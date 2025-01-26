@@ -1,5 +1,7 @@
+import { NextFunction, Request, Response } from 'express'
 import { Joi, celebrate } from 'celebrate'
 import { Types } from 'mongoose'
+import BadRequestError from '../errors/bad-request-error'
 
 // eslint-disable-next-line no-useless-escape
 export const phoneRegExp = /^(\+\d+)?(?:\s|-?|\(?\d+\)?)+$/
@@ -7,6 +9,11 @@ export const phoneRegExp = /^(\+\d+)?(?:\s|-?|\(?\d+\)?)+$/
 export enum PaymentType {
     Card = 'card',
     Online = 'online',
+}
+
+export const validatePhoneNumber = (input: string) => {
+    const regex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
+    return regex.test(input);
 }
 
 // валидация id
@@ -133,3 +140,19 @@ export const validateAuthentication = celebrate({
         }),
     }),
 })
+
+export const validateQuery = async (
+    req: Request,
+    _: Response,
+    next: NextFunction
+) => {
+    const keys = Object.keys(req.query)
+    for (let i = 0; i < keys.length; i += 1) {
+        if (typeof req.query[keys[i]] === 'object') {
+            next(
+                new BadRequestError('Входной параметр не может быть объектом!')
+            )
+        }
+    }
+    next()
+}

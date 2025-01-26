@@ -1,10 +1,12 @@
 import { NextFunction, Request, Response } from 'express'
 import { FilterQuery, Error as MongooseError, Types } from 'mongoose'
+import validator from 'validator'
 import BadRequestError from '../errors/bad-request-error'
 import NotFoundError from '../errors/not-found-error'
 import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
+import { validatePhoneNumber } from '../middlewares/validations'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -114,10 +116,13 @@ export const getOrders = async (
             sort[sortField as string] = sortOrder === 'desc' ? -1 : 1
         }
 
+        const newPage = Math.max(1, Number(page) || 1)
+        const newLimit = Math.min(10, Math.max(1, Number(limit) || 10))
+
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(Math.max(1, Number(page) || 1)) - 1) * Number(Math.min(10, Math.max(1, Number(limit) || 10))) },
-            { $limit: Number(Math.min(10, Math.max(1, Number(limit) || 10))) },
+            { $skip: (Number(newPage) - 1) * Number(newLimit) },
+            { $limit: Number(newLimit) },
             {
                 $group: {
                     _id: '$_id',
@@ -132,16 +137,17 @@ export const getOrders = async (
         )
 
         const orders = await Order.aggregate(aggregatePipeline)
+        console.log(orders);
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(limit))
+        const totalPages = Math.ceil(totalOrders / Number(newLimit))
 
         res.status(200).json({
             orders,
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(page),
-                pageSize: Number(limit),
+                currentPage: Number(newPage),
+                pageSize: Number(newLimit),
             },
         })
     } catch (error) {
@@ -313,9 +319,9 @@ export const createOrder = async (
             totalAmount: total,
             products: items,
             payment,
-            phone,
+            phone: phone ? validatePhoneNumber(phone) : '',
             email,
-            comment,
+            comment: comment ? validator.escape(comment) : '',
             customer: userId,
             deliveryAddress: address,
         })
