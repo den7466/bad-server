@@ -1,32 +1,36 @@
-import { Request, Response, NextFunction, Express } from 'express'
+import { faker } from '@faker-js/faker'
+import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
-import { join } from 'path'
-
+import path, { join } from 'path'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
 
 const storage = multer.diskStorage({
-    destination: function (
+    destination: (
         _req: Request,
         _file: Express.Multer.File,
         cb: DestinationCallback
-    ) {
-      cb(null, join(__dirname, 
-        process.env.UPLOAD_PATH_TEMP
-            ? `../public/${process.env.UPLOAD_PATH_TEMP}`
-            : '../public'
-        ))
+    ) => {
+        cb(
+            null,
+            join(
+                __dirname,
+                process.env.UPLOAD_PATH_TEMP
+                    ? `../public/${process.env.UPLOAD_PATH_TEMP}`
+                    : '../public'
+            )
+        )
     },
-    filename: function (
+
+    filename: (
         _req: Request,
         file: Express.Multer.File,
         cb: FileNameCallback
-    ) {
-      const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-      cb(null, file.fieldname + '-' + uniqueSuffix)
-    }
-  })
+    ) => {
+        cb(null, `${faker.string.uuid()}${path.extname(file.originalname)}`);
+    },
+})
 
 const types = [
     'image/png',
@@ -41,17 +45,21 @@ const fileFilter = (
     file: Express.Multer.File,
     cb: FileFilterCallback
 ) => {
-    const fileSize = Number(_req.headers['content-length']);
-    if (fileSize <= 2000) {
-        return cb(null, false)
-    }
-    
-    if (fileSize >= 10485760) {
+    // if (!file.buffer) {
+    //     return cb(null, false)
+    // }
+
+    if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
 
-    if (!types.includes(file.mimetype)) {
-        console.log('check mime');
+    const fileSize = Number(_req.headers['content-length']);
+
+    if (fileSize <= 2000) {
+        return cb(null, false)
+    }
+            
+    if (fileSize >= 10485760) {
         return cb(null, false)
     }
 
