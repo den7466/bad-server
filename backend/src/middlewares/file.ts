@@ -1,6 +1,7 @@
 import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import { join } from 'path'
+import { faker } from '@faker-js/faker'
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
@@ -27,7 +28,9 @@ const storage = multer.diskStorage({
         file: Express.Multer.File,
         cb: FileNameCallback
     ) => {
-        cb(null, file.originalname)
+        const originalFileName = file.originalname.split('.');
+        const newFilename = `${faker.string.uuid()}.${originalFileName[1]}`;
+        cb(null, newFilename)
     },
 })
 
