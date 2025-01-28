@@ -6,7 +6,6 @@ import NotFoundError from '../errors/not-found-error'
 import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
-import { phoneRegExp } from '../middlewares/validations'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -298,12 +297,6 @@ export const createOrder = async (
         const userId = res.locals.user._id
         const { address, payment, phone, total, email, items, comment } =
             req.body
-
-        console.log({ address, payment, phone, total, email, items, comment })
-
-        if(phone.length > 20) {
-            throw new BadRequestError(`Неверный формат номера телефона`)
-        }
 
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p: any) => p._id.equals(id))

@@ -33,8 +33,8 @@ app.use(json())
 
 app.options('*', cors())
 app.use(routes)
-app.use(errorHandler)
 app.use(errors())
+app.use(errorHandler)
 
 // eslint-disable-next-line no-console
 
