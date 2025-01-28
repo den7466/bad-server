@@ -17,10 +17,10 @@ export const uploadFile = async (
 
             console.log({
                 fileName,
-                originalName: req.file?.originalname,});
+                });
         return res.status(constants.HTTP_STATUS_CREATED).send({
             fileName,
-            originalName: req.file?.originalname,
+            originalName: fileName,
         })
     } catch (error) {
         return next(error)
