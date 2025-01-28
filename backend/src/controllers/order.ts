@@ -6,6 +6,7 @@ import NotFoundError from '../errors/not-found-error'
 import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
+import { paginationLimit, paginationPage } from '../middlewares/pagination'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -115,13 +116,10 @@ export const getOrders = async (
             sort[sortField as string] = sortOrder === 'desc' ? -1 : 1
         }
 
-        const newPage = Math.max(1, Number(page) || 1)
-        const newLimit = Math.min(10, Math.max(1, Number(limit) || 10))
-
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(newPage) - 1) * Number(newLimit) },
-            { $limit: Number(newLimit) },
+            { $skip: (Number(paginationPage(page)) - 1) * Number(paginationLimit(limit)) },
+            { $limit: Number(paginationLimit(limit)) },
             {
                 $group: {
                     _id: '$_id',
@@ -137,15 +135,15 @@ export const getOrders = async (
 
         const orders = await Order.aggregate(aggregatePipeline)
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(newLimit))
+        const totalPages = Math.ceil(totalOrders / Number(paginationLimit(limit)))
 
         res.status(200).json({
             orders,
             pagination: {
                 totalOrders,
                 totalPages,
-                currentPage: Number(newPage),
-                pageSize: Number(newLimit),
+                currentPage: Number(paginationPage(page)),
+                pageSize: Number(paginationLimit(limit)),
             },
         })
     } catch (error) {
