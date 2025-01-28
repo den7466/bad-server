@@ -11,11 +11,6 @@ export enum PaymentType {
     Online = 'online',
 }
 
-export const validatePhoneNumber = (input: string) => {
-    const regex = /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/;
-    return regex.test(input);
-}
-
 // валидация id
 export const validateOrderBody = celebrate({
     body: Joi.object().keys({

@@ -6,7 +6,7 @@ import NotFoundError from '../errors/not-found-error'
 import Order, { IOrder } from '../models/order'
 import Product, { IProduct } from '../models/product'
 import User from '../models/user'
-import { validatePhoneNumber } from '../middlewares/validations'
+import { phoneRegExp } from '../middlewares/validations'
 
 // eslint-disable-next-line max-len
 // GET /orders?page=2&limit=5&sort=totalAmount&order=desc&orderDateFrom=2024-07-01&orderDateTo=2024-08-01&status=delivering&totalAmountFrom=100&totalAmountTo=1000&search=%2B1
@@ -137,7 +137,6 @@ export const getOrders = async (
         )
 
         const orders = await Order.aggregate(aggregatePipeline)
-        console.log(orders);
         const totalOrders = await Order.countDocuments(filters)
         const totalPages = Math.ceil(totalOrders / Number(newLimit))
 
@@ -300,6 +299,12 @@ export const createOrder = async (
         const { address, payment, phone, total, email, items, comment } =
             req.body
 
+        console.log({ address, payment, phone, total, email, items, comment })
+
+        if(phone.length > 20) {
+            throw new BadRequestError(`Неверный формат номера телефона`)
+        }
+
         items.forEach((id: Types.ObjectId) => {
             const product = products.find((p: any) => p._id.equals(id))
             if (!product) {
@@ -312,14 +317,14 @@ export const createOrder = async (
         })
         const totalBasket = basket.reduce((a, c) => a + c.price, 0)
         if (totalBasket !== total) {
-            return next(new BadRequestError('Неверная сумма заказа'))
+            throw new BadRequestError(`Неверная сумма заказа`)
         }
 
         const newOrder = new Order({
             totalAmount: total,
             products: items,
             payment,
-            phone: phone ? validatePhoneNumber(phone) : '',
+            phone,
             email,
             comment: comment ? validator.escape(comment) : '',
             customer: userId,

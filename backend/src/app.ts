@@ -16,13 +16,13 @@ const app = express()
 
 app.use(cookieParser())
 
-// app.use(cors())
-app.use(cors({
-    origin: ORIGIN_ALLOW,
-    credentials: true,
-    methods: ['GET', 'POST', 'PATCH', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  }));
+app.use(cors())
+// app.use(cors({
+//     origin: ORIGIN_ALLOW,
+//     credentials: true,
+//     methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+//     allowedHeaders: ['Content-Type', 'Authorization'],
+//   }));
 // app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(serveStatic(path.join(__dirname, 'public')))
@@ -33,8 +33,8 @@ app.use(json())
 
 app.options('*', cors())
 app.use(routes)
-app.use(errors())
 app.use(errorHandler)
+app.use(errors())
 
 // eslint-disable-next-line no-console
 
