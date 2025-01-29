@@ -12,14 +12,14 @@ export const uploadFile = async (
         return next(new BadRequestError('Файл не загружен'))
     }
     try {
-        const metadata = await sharp(req.file?.path).metadata()
-        const { width = 0, height = 0 } = metadata
-        if (width < 50 || height < 50) {
-            return next(new BadRequestError('Неправильный формат изображения'))
-        }
+        // const metadata = await sharp(req.file?.path).metadata()
+        // const { width = 0, height = 0 } = metadata
+        // if (width < 50 || height < 50) {
+        //     return next(new BadRequestError('Неправильный формат изображения'))
+        // }
         const fileName = process.env.UPLOAD_PATH
             ? `/${process.env.UPLOAD_PATH}/${req.file?.filename}`
-            : `/11111111111111${req.file?.filename}`;
+            : `/${req.file?.filename}`;
         return res.status(constants.HTTP_STATUS_CREATED).send({
             fileName,
             originalName: req.file?.originalname,

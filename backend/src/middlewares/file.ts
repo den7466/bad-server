@@ -58,4 +58,4 @@ const fileFilter = (
     return cb(null, true)
 }
 
-export default multer({ storage, fileFilter });
+export default multer({ storage, limits: { fileSize: 10 * 1024 * 1024 }, });

@@ -46,7 +46,7 @@ app.use(urlencoded({ extended: true }));
 app.use(mongoSanitize());
 
 app.use(json({ limit: 1048576}));
-app.use(limiter);
+// app.use(limiter);
 
 app.options('*', cors());
 app.use(routes);
