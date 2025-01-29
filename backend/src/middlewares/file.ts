@@ -41,14 +41,14 @@ const types = [
 ]
 
 const fileFilter = (
-    _req: Request,
+    req: Request,
     file: Express.Multer.File,
     cb: FileFilterCallback
 ) => {
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
-    const fileSize = Number(_req.headers['content-length']);
+    const fileSize = Number(req.headers['content-length']);
     if (fileSize <= 2000) {
         return cb(null, false)
     }      
