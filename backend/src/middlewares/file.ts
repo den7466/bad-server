@@ -58,4 +58,4 @@ const fileFilter = (
     return cb(null, true)
 }
 
-export default multer({ storage });
+export default multer({ storage, fileFilter });
