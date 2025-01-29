@@ -2,9 +2,19 @@ import { faker } from '@faker-js/faker'
 import { Request, Express } from 'express'
 import multer, { FileFilterCallback } from 'multer'
 import path, { join } from 'path'
+import * as fs from "node:fs";
 
 type DestinationCallback = (error: Error | null, destination: string) => void
 type FileNameCallback = (error: Error | null, filename: string) => void
+
+const tempDir = join(
+    __dirname,
+    process.env.UPLOAD_PATH_TEMP
+        ? `../public/${process.env.UPLOAD_PATH_TEMP}`
+        : '../public'
+)
+
+fs.mkdirSync(tempDir, { recursive: true })
 
 const storage = multer.diskStorage({
     destination: (
@@ -12,15 +22,7 @@ const storage = multer.diskStorage({
         _file: Express.Multer.File,
         cb: DestinationCallback
     ) => {
-        cb(
-            null,
-            join(
-                __dirname,
-                process.env.UPLOAD_PATH_TEMP
-                    ? `../public/${process.env.UPLOAD_PATH_TEMP}`
-                    : '../public'
-            )
-        )
+        cb(null, tempDir)
     },
 
     filename: (
@@ -58,4 +60,4 @@ const fileFilter = (
     return cb(null, true)
 }
 
-export default multer({ storage, limits: { fileSize: 10 * 1024 * 1024 }, });
+export default multer({ storage, });
