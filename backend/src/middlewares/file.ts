@@ -45,24 +45,16 @@ const fileFilter = (
     file: Express.Multer.File,
     cb: FileFilterCallback
 ) => {
-    // if (!file.buffer) {
-    //     return cb(null, false)
-    // }
-
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }
-
     const fileSize = Number(_req.headers['content-length']);
-
     if (fileSize <= 2000) {
         return cb(null, false)
-    }
-            
+    }      
     if (fileSize >= 10485760) {
         return cb(null, false)
     }
-
     return cb(null, true)
 }
 
