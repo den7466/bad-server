@@ -45,9 +45,6 @@ const fileFilter = (
     file: Express.Multer.File,
     cb: FileFilterCallback
 ) => {
-    if(!file.buffer) {
-        return cb(null, false)
-    }
     if (!types.includes(file.mimetype)) {
         return cb(null, false)
     }

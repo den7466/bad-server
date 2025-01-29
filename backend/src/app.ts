@@ -6,6 +6,8 @@ import 'dotenv/config';
 import express, { json, urlencoded } from 'express';
 import mongoose from 'mongoose';
 import path from 'path';
+import { constants } from 'http2';
+import { rateLimit } from 'express-rate-limit';
 import { DB_ADDRESS, ORIGIN_ALLOW } from './config';
 import errorHandler from './middlewares/error-handler';
 import serveStatic from './middlewares/serverStatic';
@@ -13,6 +15,19 @@ import routes from './routes';
 
 const { PORT = 3000 } = process.env;
 const app = express();
+const limiter = rateLimit({
+    windowMs: 120 * 60 * 1000,
+    max: 20,
+    handler: (_req, res) => {
+        res.status(constants.HTTP_STATUS_TOO_MANY_REQUESTS).json({
+            message: 'Был превышен лимит запросов',
+        })
+    },
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: false,
+    skipFailedRequests: false,
+})
 
 app.use(cookieParser());
 
@@ -29,7 +44,9 @@ app.use(serveStatic(path.join(__dirname, 'public')));
 
 app.use(urlencoded({ extended: true }));
 app.use(mongoSanitize());
-app.use(json());
+
+app.use(json({ limit: 1048576}));
+app.use(limiter);
 
 app.options('*', cors());
 app.use(routes);
