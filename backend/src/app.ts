@@ -16,8 +16,7 @@ import routes from './routes'
 const { PORT = 3000 } = process.env
 const app = express()
 const limiter = rateLimit({
-    windowMs: 120 * 60 * 1000,
-    limit: 100,
+    windowMs: 15 * 60 * 1000,
     max: 20,
     handler: (_req, res) => {
         res.status(constants.HTTP_STATUS_TOO_MANY_REQUESTS).json({
