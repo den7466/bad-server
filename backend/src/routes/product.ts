@@ -21,14 +21,14 @@ productRouter.post(
     auth,
     roleGuardMiddleware(Role.Admin),
     validateProductBody,
-    createProduct
+    createProduct,
 )
 productRouter.delete(
     '/:productId',
     auth,
     roleGuardMiddleware(Role.Admin),
     validateObjId,
-    deleteProduct
+    deleteProduct,
 )
 productRouter.patch(
     '/:productId',
@@ -36,7 +36,7 @@ productRouter.patch(
     roleGuardMiddleware(Role.Admin),
     validateObjId,
     validateProductUpdateBody,
-    updateProduct
+    updateProduct,
 )
 
 export default productRouter

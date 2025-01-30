@@ -24,7 +24,7 @@ const auth = async (req: Request, res: Response, next: NextFunction) => {
             {
                 _id: new Types.ObjectId(payload.sub),
             },
-            { password: 0, salt: 0 }
+            { password: 0, salt: 0 },
         )
 
         if (!user) {
@@ -48,7 +48,7 @@ export function roleGuardMiddleware(...roles: Role[]) {
         }
 
         const hasAccess = roles.some((role) =>
-            res.locals.user.roles.includes(role)
+            res.locals.user.roles.includes(role),
         )
 
         if (!hasAccess) {
@@ -62,7 +62,7 @@ export function roleGuardMiddleware(...roles: Role[]) {
 export function currentUserAccessMiddleware<T>(
     model: Model<T>,
     idProperty: string,
-    userProperty: keyof T
+    userProperty: keyof T,
 ) {
     return async (req: Request, res: Response, next: NextFunction) => {
         const id = req.params[idProperty]
@@ -83,7 +83,7 @@ export function currentUserAccessMiddleware<T>(
 
         const userEntityId = entity[userProperty] as Types.ObjectId
         const hasAccess = new Types.ObjectId(res.locals.user.id).equals(
-            userEntityId
+            userEntityId,
         )
 
         if (!hasAccess) {

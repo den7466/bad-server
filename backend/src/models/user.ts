@@ -37,7 +37,7 @@ interface IUserMethods {
 interface IUserModel extends Model<IUser, {}, IUserMethods> {
     findUserByCredentials: (
         email: string,
-        password: string
+        password: string,
     ) => Promise<HydratedDocument<IUser, IUserMethods>>
 }
 
@@ -113,7 +113,7 @@ const userSchema = new mongoose.Schema<IUser, IUserModel, IUserMethods>(
                 return ret
             },
         },
-    }
+    },
 )
 
 // Возможно добавление хеша в контроллере регистрации
@@ -142,7 +142,7 @@ userSchema.methods.generateAccessToken = function generateAccessToken() {
         {
             expiresIn: ACCESS_TOKEN.expiry,
             subject: user.id.toString(),
-        }
+        },
     )
 }
 
@@ -158,7 +158,7 @@ userSchema.methods.generateRefreshToken =
             {
                 expiresIn: REFRESH_TOKEN.expiry,
                 subject: user.id.toString(),
-            }
+            },
         )
 
         // Можно лучше: Создаем хеш refresh токена
@@ -176,7 +176,7 @@ userSchema.methods.generateRefreshToken =
 
 userSchema.statics.findUserByCredentials = async function findByCredentials(
     email: string,
-    password: string
+    password: string,
 ) {
     const user = await this.findOne({ email })
         .select('+password')
@@ -184,7 +184,7 @@ userSchema.statics.findUserByCredentials = async function findByCredentials(
     const passwdMatch = md5(password) === user.password
     if (!passwdMatch) {
         return Promise.reject(
-            new UnauthorizedError('Неправильные почта или пароль')
+            new UnauthorizedError('Неправильные почта или пароль'),
         )
     }
     return user

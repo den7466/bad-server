@@ -6,7 +6,7 @@ import BadRequestError from '../errors/bad-request-error'
 export const uploadFile = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     if (!req.file) {
         return next(new BadRequestError('Файл не загружен'))
@@ -19,7 +19,7 @@ export const uploadFile = async (
         }
         const fileName = process.env.UPLOAD_PATH
             ? `/${process.env.UPLOAD_PATH}/${req.file?.filename}`
-            : `/${req.file?.filename}`;
+            : `/${req.file?.filename}`
         return res.status(constants.HTTP_STATUS_CREATED).send({
             fileName,
             originalName: req.file?.originalname,

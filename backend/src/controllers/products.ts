@@ -37,7 +37,7 @@ const getProducts = async (req: Request, res: Response, next: NextFunction) => {
 const createProduct = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const { description, category, price, title, image } = req.body
@@ -47,7 +47,7 @@ const createProduct = async (
             movingFile(
                 image.fileName,
                 join(__dirname, `../public/${process.env.UPLOAD_PATH_TEMP}`),
-                join(__dirname, `../public/${process.env.UPLOAD_PATH}`)
+                join(__dirname, `../public/${process.env.UPLOAD_PATH}`),
             )
         }
 
@@ -65,7 +65,7 @@ const createProduct = async (
         }
         if (error instanceof Error && error.message.includes('E11000')) {
             return next(
-                new ConflictError('Товар с таким заголовком уже существует')
+                new ConflictError('Товар с таким заголовком уже существует'),
             )
         }
         return next(error)
@@ -77,7 +77,7 @@ const createProduct = async (
 const updateProduct = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const { productId } = req.params
@@ -88,7 +88,7 @@ const updateProduct = async (
             movingFile(
                 image.fileName,
                 join(__dirname, `../public/${process.env.UPLOAD_PATH_TEMP}`),
-                join(__dirname, `../public/${process.env.UPLOAD_PATH}`)
+                join(__dirname, `../public/${process.env.UPLOAD_PATH}`),
             )
         }
 
@@ -101,7 +101,7 @@ const updateProduct = async (
                     image: req.body.image ? req.body.image : undefined,
                 },
             },
-            { runValidators: true, new: true }
+            { runValidators: true, new: true },
         ).orFail(() => new NotFoundError('Нет товара по заданному id'))
         return res.send(product)
     } catch (error) {
@@ -113,7 +113,7 @@ const updateProduct = async (
         }
         if (error instanceof Error && error.message.includes('E11000')) {
             return next(
-                new ConflictError('Товар с таким заголовком уже существует')
+                new ConflictError('Товар с таким заголовком уже существует'),
             )
         }
         return next(error)
@@ -125,12 +125,12 @@ const updateProduct = async (
 const deleteProduct = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const { productId } = req.params
         const product = await Product.findByIdAndDelete(productId).orFail(
-            () => new NotFoundError('Нет товара по заданному id')
+            () => new NotFoundError('Нет товара по заданному id'),
         )
         return res.send(product)
     } catch (error) {

@@ -14,7 +14,7 @@ import { paginationLimit, paginationPage } from '../middlewares/pagination'
 export const getOrders = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const {
@@ -118,7 +118,11 @@ export const getOrders = async (
 
         aggregatePipeline.push(
             { $sort: sort },
-            { $skip: (Number(paginationPage(page)) - 1) * Number(paginationLimit(limit)) },
+            {
+                $skip:
+                    (Number(paginationPage(page)) - 1) *
+                    Number(paginationLimit(limit)),
+            },
             { $limit: Number(paginationLimit(limit)) },
             {
                 $group: {
@@ -130,12 +134,14 @@ export const getOrders = async (
                     customer: { $first: '$customer' },
                     createdAt: { $first: '$createdAt' },
                 },
-            }
+            },
         )
 
         const orders = await Order.aggregate(aggregatePipeline)
         const totalOrders = await Order.countDocuments(filters)
-        const totalPages = Math.ceil(totalOrders / Number(paginationLimit(limit)))
+        const totalPages = Math.ceil(
+            totalOrders / Number(paginationLimit(limit)),
+        )
 
         res.status(200).json({
             orders,
@@ -154,7 +160,7 @@ export const getOrders = async (
 export const getOrdersCurrentUser = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const userId = res.locals.user._id
@@ -179,8 +185,8 @@ export const getOrdersCurrentUser = async (
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Пользователь по заданному id отсутствует в базе'
-                    )
+                        'Пользователь по заданному id отсутствует в базе',
+                    ),
             )
 
         let orders = user.orders as unknown as IOrder[]
@@ -195,7 +201,7 @@ export const getOrdersCurrentUser = async (
             orders = orders.filter((order) => {
                 // eslint-disable-next-line max-len
                 const matchesProductTitle = order.products.some((product) =>
-                    productIds.some((id: any) => id.equals(product._id))
+                    productIds.some((id: any) => id.equals(product._id)),
                 )
                 // eslint-disable-next-line max-len
                 const matchesOrderNumber =
@@ -229,7 +235,7 @@ export const getOrdersCurrentUser = async (
 export const getOrderByNumber = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const order = await Order.findOne({
@@ -239,8 +245,8 @@ export const getOrderByNumber = async (
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
+                        'Заказ по заданному id отсутствует в базе',
+                    ),
             )
         return res.status(200).json(order)
     } catch (error) {
@@ -254,7 +260,7 @@ export const getOrderByNumber = async (
 export const getOrderCurrentUserByNumber = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     const userId = res.locals.user._id
     try {
@@ -265,13 +271,13 @@ export const getOrderCurrentUserByNumber = async (
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
+                        'Заказ по заданному id отсутствует в базе',
+                    ),
             )
         if (!order.customer._id.equals(userId)) {
             // Если нет доступа не возвращаем 403, а отдаем 404
             return next(
-                new NotFoundError('Заказ по заданному id отсутствует в базе')
+                new NotFoundError('Заказ по заданному id отсутствует в базе'),
             )
         }
         return res.status(200).json(order)
@@ -287,7 +293,7 @@ export const getOrderCurrentUserByNumber = async (
 export const createOrder = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const basket: IProduct[] = []
@@ -337,20 +343,20 @@ export const createOrder = async (
 export const updateOrder = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const { status } = req.body
         const updatedOrder = await Order.findOneAndUpdate(
             { orderNumber: req.params.orderNumber },
             { status },
-            { new: true, runValidators: true }
+            { new: true, runValidators: true },
         )
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
+                        'Заказ по заданному id отсутствует в базе',
+                    ),
             )
             .populate(['customer', 'products'])
         return res.status(200).json(updatedOrder)
@@ -369,15 +375,15 @@ export const updateOrder = async (
 export const deleteOrder = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const deletedOrder = await Order.findByIdAndDelete(req.params.id)
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Заказ по заданному id отсутствует в базе'
-                    )
+                        'Заказ по заданному id отсутствует в базе',
+                    ),
             )
             .populate(['customer', 'products'])
         return res.status(200).json(deletedOrder)

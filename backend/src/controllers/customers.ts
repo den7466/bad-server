@@ -11,7 +11,7 @@ import { paginationLimit, paginationPage } from '../middlewares/pagination'
 export const getCustomers = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const {
@@ -98,7 +98,7 @@ export const getCustomers = async (
                 {
                     $or: [{ deliveryAddress: searchRegex }],
                 },
-                '_id'
+                '_id',
             )
 
             const orderIds = orders.map((order) => order._id)
@@ -117,7 +117,9 @@ export const getCustomers = async (
 
         const options = {
             sort,
-            skip: (Number(paginationPage(page)) - 1) * Number(paginationLimit(limit)),
+            skip:
+                (Number(paginationPage(page)) - 1) *
+                Number(paginationLimit(limit)),
             limit: Number(paginationLimit(limit)),
         }
 
@@ -138,7 +140,9 @@ export const getCustomers = async (
         ])
 
         const totalUsers = await User.countDocuments(filters)
-        const totalPages = Math.ceil(totalUsers / Number(paginationLimit(limit)))
+        const totalPages = Math.ceil(
+            totalUsers / Number(paginationLimit(limit)),
+        )
 
         res.status(200).json({
             customers: users,
@@ -159,7 +163,7 @@ export const getCustomers = async (
 export const getCustomerById = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const user = await User.findById(req.params.id).populate([
@@ -177,7 +181,7 @@ export const getCustomerById = async (
 export const updateCustomer = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const updatedUser = await User.findByIdAndUpdate(
@@ -185,13 +189,13 @@ export const updateCustomer = async (
             req.body,
             {
                 new: true,
-            }
+            },
         )
             .orFail(
                 () =>
                     new NotFoundError(
-                        'Пользователь по заданному id отсутствует в базе'
-                    )
+                        'Пользователь по заданному id отсутствует в базе',
+                    ),
             )
             .populate(['orders', 'lastOrder'])
         res.status(200).json(updatedUser)
@@ -205,14 +209,14 @@ export const updateCustomer = async (
 export const deleteCustomer = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const deletedUser = await User.findByIdAndDelete(req.params.id).orFail(
             () =>
                 new NotFoundError(
-                    'Пользователь по заданному id отсутствует в базе'
-                )
+                    'Пользователь по заданному id отсутствует в базе',
+                ),
         )
         res.status(200).json(deletedUser)
     } catch (error) {
