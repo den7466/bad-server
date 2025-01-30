@@ -1,5 +1,7 @@
+import { NextFunction, Request, Response } from 'express'
 import { Joi, celebrate } from 'celebrate'
 import { Types } from 'mongoose'
+import BadRequestError from '../errors/bad-request-error'
 
 // eslint-disable-next-line no-useless-escape
 export const phoneRegExp = /^(\+\d+)?(?:\s|-?|\(?\d+\)?)+$/
@@ -19,7 +21,7 @@ export const validateOrderBody = celebrate({
                         return value
                     }
                     return helpers.message({ custom: 'Невалидный id' })
-                })
+                }),
             )
             .messages({
                 'array.empty': 'Не указаны товары',
@@ -35,9 +37,20 @@ export const validateOrderBody = celebrate({
         email: Joi.string().email().required().messages({
             'string.empty': 'Не указан email',
         }),
-        phone: Joi.string().required().pattern(phoneRegExp).messages({
-            'string.empty': 'Не указан телефон',
-        }),
+        phone: Joi.string()
+            .min(10)
+            .max(18)
+            .pattern(phoneRegExp)
+            .required()
+            .messages({
+                'string.base': 'Телефон должен быть текстом',
+                'string.min':
+                    'Телефон должен быть длиной не менее {#limit} символов',
+                'string.max': 'Телефон не может превышать {#limit} символов',
+                'string.empty': 'Не указан телефон',
+                'string.pattern.base': 'Строка не является номером телефоноа',
+                'any.required': 'Телефон обязателен',
+            }),
         address: Joi.string().required().messages({
             'string.empty': 'Не указан адрес',
         }),
@@ -133,3 +146,19 @@ export const validateAuthentication = celebrate({
         }),
     }),
 })
+
+export const validateQuery = async (
+    req: Request,
+    _: Response,
+    next: NextFunction,
+) => {
+    const keys = Object.keys(req.query)
+    for (let i = 0; i < keys.length; i += 1) {
+        if (typeof req.query[keys[i]] === 'object') {
+            next(
+                new BadRequestError('Ощибка формата данных'),
+            )
+        }
+    }
+    next()
+}

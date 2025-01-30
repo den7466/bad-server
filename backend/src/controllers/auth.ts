@@ -20,7 +20,7 @@ const login = async (req: Request, res: Response, next: NextFunction) => {
         res.cookie(
             REFRESH_TOKEN.cookie.name,
             refreshToken,
-            REFRESH_TOKEN.cookie.options
+            REFRESH_TOKEN.cookie.options,
         )
         return res.json({
             success: true,
@@ -44,7 +44,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         res.cookie(
             REFRESH_TOKEN.cookie.name,
             refreshToken,
-            REFRESH_TOKEN.cookie.options
+            REFRESH_TOKEN.cookie.options,
         )
         return res.status(constants.HTTP_STATUS_CREATED).json({
             success: true,
@@ -57,7 +57,7 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
         }
         if (error instanceof Error && error.message.includes('E11000')) {
             return next(
-                new ConflictError('Пользователь с таким email уже существует')
+                new ConflictError('Пользователь с таким email уже существует'),
             )
         }
         return next(error)
@@ -68,15 +68,15 @@ const register = async (req: Request, res: Response, next: NextFunction) => {
 const getCurrentUser = async (
     _req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const userId = res.locals.user._id
         const user = await User.findById(userId).orFail(
             () =>
                 new NotFoundError(
-                    'Пользователь по заданному id отсутствует в базе'
-                )
+                    'Пользователь по заданному id отсутствует в базе',
+                ),
         )
         res.json({ user, success: true })
     } catch (error) {
@@ -88,7 +88,7 @@ const getCurrentUser = async (
 const deleteRefreshTokenInUser = async (
     req: Request,
     _res: Response,
-    _next: NextFunction
+    _next: NextFunction,
 ) => {
     const { cookies } = req
     const rfTkn = cookies[REFRESH_TOKEN.cookie.name]
@@ -99,7 +99,7 @@ const deleteRefreshTokenInUser = async (
 
     const decodedRefreshTkn = jwt.verify(
         rfTkn,
-        REFRESH_TOKEN.secret
+        REFRESH_TOKEN.secret,
     ) as JwtPayload
     const user = await User.findOne({
         _id: decodedRefreshTkn._id,
@@ -139,20 +139,20 @@ const logout = async (req: Request, res: Response, next: NextFunction) => {
 const refreshAccessToken = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     try {
         const userWithRefreshTkn = await deleteRefreshTokenInUser(
             req,
             res,
-            next
+            next,
         )
         const accessToken = await userWithRefreshTkn.generateAccessToken()
         const refreshToken = await userWithRefreshTkn.generateRefreshToken()
         res.cookie(
             REFRESH_TOKEN.cookie.name,
             refreshToken,
-            REFRESH_TOKEN.cookie.options
+            REFRESH_TOKEN.cookie.options,
         )
         return res.json({
             success: true,
@@ -167,7 +167,7 @@ const refreshAccessToken = async (
 const getCurrentUserRoles = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     const userId = res.locals.user._id
     try {
@@ -176,8 +176,8 @@ const getCurrentUserRoles = async (
         }).orFail(
             () =>
                 new NotFoundError(
-                    'Пользователь по заданному id отсутствует в базе'
-                )
+                    'Пользователь по заданному id отсутствует в базе',
+                ),
         )
         res.status(200).json(res.locals.user.roles)
     } catch (error) {
@@ -188,7 +188,7 @@ const getCurrentUserRoles = async (
 const updateCurrentUser = async (
     req: Request,
     res: Response,
-    next: NextFunction
+    next: NextFunction,
 ) => {
     const userId = res.locals.user._id
     try {
@@ -197,8 +197,8 @@ const updateCurrentUser = async (
         }).orFail(
             () =>
                 new NotFoundError(
-                    'Пользователь по заданному id отсутствует в базе'
-                )
+                    'Пользователь по заданному id отсутствует в базе',
+                ),
         )
         res.status(200).json(updatedUser)
     } catch (error) {

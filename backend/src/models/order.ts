@@ -69,7 +69,7 @@ const orderSchema: Schema = new Schema(
             default: '',
         },
     },
-    { versionKey: false, timestamps: true }
+    { versionKey: false, timestamps: true },
 )
 
 orderSchema.pre('save', async function incrementOrderNumber(next) {
@@ -79,7 +79,7 @@ orderSchema.pre('save', async function incrementOrderNumber(next) {
         const counter = await Counter.findOneAndUpdate(
             {},
             { $inc: { sequenceValue: 1 } },
-            { new: true, upsert: true }
+            { new: true, upsert: true },
         )
 
         order.orderNumber = counter.sequenceValue
